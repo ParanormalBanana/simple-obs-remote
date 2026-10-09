@@ -31,13 +31,8 @@ const storage = {
   era: "simple-obs-remote.era"
 };
 
-const confirmEl = document.querySelector("#confirm");
-const confirmTitle = document.querySelector("#confirm-title");
-const confirmFollow = document.querySelector("#confirm-follow");
-const confirmDanger = document.querySelector("#confirm-danger");
-const confirmOk = document.querySelector("#confirm-ok");
-const confirmDim = document.querySelector(".confirm-dim");
-const confirmX = document.querySelector(".confirm-x");
+const confirmYes = document.querySelector("#confirm-yes");
+const confirmNo = document.querySelector("#confirm-no");
 
 function applyEra(era) {
   const next = era === "2001" || era === "2021" ? era : "1998";
@@ -59,37 +54,26 @@ document.querySelectorAll(".eras button").forEach((button) => {
 });
 
 let confirmWait = null;
+let confirmReadout = "";
 
-function askConfirm(dangerLabel, follow) {
+function askConfirm() {
   if (confirmWait) confirmWait(false);
   return new Promise((resolve) => {
-    confirmTitle.textContent = "Don't do it!";
-    confirmFollow.textContent = follow;
-    confirmDanger.textContent = dangerLabel;
-    confirmEl.hidden = false;
-    confirmEl.classList.remove("is-flash");
-    confirmOk.focus();
+    confirmReadout = "Are you sure?";
 
     function finish(accepted) {
       if (confirmWait !== finish) return;
       confirmWait = null;
-      confirmEl.hidden = true;
-      confirmEl.classList.remove("is-flash");
-      confirmDanger.removeEventListener("click", onDanger);
-      confirmOk.removeEventListener("click", onAbort);
-      confirmX.removeEventListener("click", onAbort);
-      confirmDim.removeEventListener("click", onDim);
+      confirmReadout = "";
+      confirmYes.removeEventListener("click", onYes);
+      confirmNo.removeEventListener("click", onNo);
       document.removeEventListener("keydown", onKey);
+      if (state.connected) render();
       resolve(accepted);
     }
 
-    function onDanger() { finish(true); }
-    function onAbort() { finish(false); }
-    function onDim() {
-      confirmEl.classList.remove("is-flash");
-      void confirmEl.offsetWidth;
-      confirmEl.classList.add("is-flash");
-    }
+    function onYes() { finish(true); }
+    function onNo() { finish(false); }
     function onKey(event) {
       if (event.key !== "Escape") return;
       event.preventDefault();
@@ -97,11 +81,11 @@ function askConfirm(dangerLabel, follow) {
     }
 
     confirmWait = finish;
-    confirmDanger.addEventListener("click", onDanger);
-    confirmOk.addEventListener("click", onAbort);
-    confirmX.addEventListener("click", onAbort);
-    confirmDim.addEventListener("click", onDim);
+    confirmYes.addEventListener("click", onYes);
+    confirmNo.addEventListener("click", onNo);
     document.addEventListener("keydown", onKey);
+    render();
+    confirmNo.focus();
   });
 }
 
@@ -124,9 +108,16 @@ let pollTimer = null;
 let errorUntil = 0;
 let sceneKey = "";
 
+function defaultAddress() {
+  const host = location.hostname;
+  const local = host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host === "::1";
+  if (location.protocol === "http:" && host && !local) return "ws://" + host + ":4455";
+  return "ws://localhost:4455";
+}
+
 function normalizeAddress(raw) {
   let value = (raw || "").trim();
-  if (!value) return "ws://localhost:4455";
+  if (!value) return defaultAddress();
   if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(value)) value = "ws://" + value;
   let url;
   try {
@@ -168,7 +159,7 @@ function readHash() {
 function loadForm() {
   const savedRemember = localStorage.getItem(storage.remember);
   rememberInput.checked = savedRemember !== "0";
-  addressInput.value = localStorage.getItem(storage.address) || "ws://localhost:4455";
+  addressInput.value = localStorage.getItem(storage.address) || defaultAddress();
   passwordInput.value = rememberInput.checked ? (localStorage.getItem(storage.password) || "") : "";
 
   const fromHash = readHash();
@@ -274,10 +265,14 @@ function writeReadout(lines) {
   perfBtn.querySelector(".perf-fps").textContent = lines[0] || "";
   perfBtn.querySelector(".perf-cpu").textContent = lines[1] || "";
   perfBtn.querySelector(".perf-skip").textContent = lines[2] || "";
-  perfBtn.setAttribute("aria-label", readings().filter(Boolean).join(" · "));
+  perfBtn.setAttribute("aria-label", confirmReadout || readings().filter(Boolean).join(" · "));
 }
 
 function setPerfText() {
+  if (confirmReadout) {
+    writeReadout([confirmReadout]);
+    return;
+  }
   const width = perfBtn.getBoundingClientRect().width;
   const square = perfBtn.classList.contains("is-square") && width > 0;
   writeReadout(square ? fittedReadings(Math.max(1, width - READOUT_PAD_X - 1)) : readings());
@@ -365,10 +360,19 @@ function readoutFont(slot, layout, lines) {
   return maxFont(layout, texts, innerW, innerH);
 }
 
+function confirmPresentation(slot) {
+  const phrase = [confirmReadout];
+  const words = confirmReadout.split(" ");
+  const lineFont = readoutFont(slot, "line", phrase);
+  const stackFont = words.length > 1 ? readoutFont(slot, "stack", words) : 0;
+  if (stackFont > lineFont) return { layout: "stack", lines: words };
+  return { layout: "line", lines: phrase };
+}
+
 function styleReadout(slot, square) {
-  const layout = readoutLayout(slot, square);
-  const innerW = Math.max(1, slot.w - READOUT_PAD_X - 1);
-  const lines = square ? fittedReadings(innerW) : readings();
+  const presented = confirmReadout ? confirmPresentation(slot) : null;
+  const lines = presented ? presented.lines : square ? fittedReadings(Math.max(1, slot.w - READOUT_PAD_X - 1)) : readings();
+  const layout = presented ? presented.layout : readoutLayout(slot, square);
   writeReadout(lines);
   perfBtn.dataset.layout = layout;
   const font = readoutFont(slot, layout, lines);
@@ -696,9 +700,25 @@ function visibleScenes(scenes) {
 
 function render() {
   const useAitum = !!state.aitum;
-  if (streamBtn.hidden !== useAitum || startAllBtn.hidden === useAitum) {
-    streamBtn.hidden = useAitum;
-    startAllBtn.hidden = !useAitum;
+  const hidden = {
+    stream: !!confirmWait || useAitum,
+    startAll: !!confirmWait || !useAitum,
+    record: !!confirmWait,
+    yes: !confirmWait,
+    no: !confirmWait
+  };
+  if (
+    streamBtn.hidden !== hidden.stream ||
+    startAllBtn.hidden !== hidden.startAll ||
+    recordBtn.hidden !== hidden.record ||
+    confirmYes.hidden !== hidden.yes ||
+    confirmNo.hidden !== hidden.no
+  ) {
+    streamBtn.hidden = hidden.stream;
+    startAllBtn.hidden = hidden.startAll;
+    recordBtn.hidden = hidden.record;
+    confirmYes.hidden = hidden.yes;
+    confirmNo.hidden = hidden.no;
     scheduleLayout(true);
   }
 
@@ -841,6 +861,7 @@ function showDisconnected(message) {
     pollTimer = null;
   }
   bar.classList.remove("is-connected");
+  if (confirmWait) confirmWait(false);
   form.hidden = false;
   pad.hidden = true;
   perfBtn.hidden = true;

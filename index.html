@@ -51,9 +51,19 @@
             </g>
           </svg>
         </button>
+        <button id="confirm-yes" class="sq" type="button" title="Yes" aria-label="Yes" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5 10 17.5 19 7"/>
+          </svg>
+        </button>
         <button id="record" class="sq" type="button" title="Start recording" aria-label="Start recording">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="12" cy="12" r="6" fill="currentColor"/>
+          </svg>
+        </button>
+        <button id="confirm-no" class="sq" type="button" title="No" aria-label="No" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M7 7 17 17M17 7 7 17"/>
           </svg>
         </button>
         <button id="pause" class="sq" type="button" title="Pause recording" aria-label="Pause recording" disabled>
@@ -80,26 +90,7 @@
     </div>
   </header>
 
-  <p id="hint" class="hint">In OBS: Tools → WebSocket Server Settings → Enable WebSocket Server. The usual address is <code>ws://localhost:4455</code>.</p>
-
-  <div id="confirm" class="confirm" hidden>
-    <button type="button" class="confirm-dim" aria-label="Dialog is open"></button>
-    <div class="confirm-window" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
-      <div class="confirm-caption">
-        <img class="confirm-mark" src="assets/hourglass-16-white.png" alt="" width="16" height="16">
-        <span>OBS remote</span>
-        <button type="button" class="confirm-x" aria-label="Close">×</button>
-      </div>
-      <div class="confirm-copy">
-        <p id="confirm-title" class="confirm-title"></p>
-        <p id="confirm-follow" class="confirm-follow"></p>
-      </div>
-      <div class="confirm-actions">
-        <button type="button" id="confirm-danger" class="confirm-danger"></button>
-        <button type="button" id="confirm-ok" class="confirm-ok">Just kidding!</button>
-      </div>
-    </div>
-  </div>
+  <p id="hint" class="hint">In OBS: Tools → WebSocket Server Settings → Enable WebSocket Server. The usual port is <code>4455</code>.</p>
 
   <script src="vendor/obs-websocket.js"></script>
   <script src="app.js"></script>

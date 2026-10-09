@@ -228,8 +228,7 @@ html[data-era="2021"] .remember input {
 .eras button,
 .connect-go,
 .confirm-danger,
-.confirm-ok,
-.confirm-x {
+.confirm-ok {
   font: inherit;
   cursor: pointer;
   touch-action: manipulation;
@@ -305,8 +304,7 @@ html[data-era="1998"] .sq,
 html[data-era="1998"] .eras button,
 html[data-era="1998"] .connect-go,
 html[data-era="1998"] .confirm-danger,
-html[data-era="1998"] .confirm-ok,
-html[data-era="1998"] .confirm-x {
+html[data-era="1998"] .confirm-ok {
   background: #c0c0c0;
   box-shadow:
     inset -1px -1px 0 #000000,
@@ -319,8 +317,7 @@ html[data-era="1998"] .sq:active:not(:disabled),
 html[data-era="1998"] .eras button:active,
 html[data-era="1998"] .connect-go:active:not(:disabled),
 html[data-era="1998"] .confirm-danger:active,
-html[data-era="1998"] .confirm-ok:active,
-html[data-era="1998"] .confirm-x:active {
+html[data-era="1998"] .confirm-ok:active {
   box-shadow:
     inset 1px 1px 0 #000000,
     inset -1px -1px 0 #ffffff,
@@ -501,6 +498,9 @@ html[data-era="2021"] .sq svg {
 html[data-era="1998"] :is(#stream, #start-all) { color: #3e8ed0; }
 html[data-era="1998"] #record { color: #f14668; }
 
+#confirm-yes { color: #3cba54; }
+#confirm-no { color: #f14668; }
+
 html[data-era="2001"] :is(#stream, #start-all, #record, #pause, #disconnect) {
   color: #555555;
 }
@@ -614,7 +614,8 @@ html[data-era="2021"] .perf:disabled {
   .pad .sq,
   .pad .perf,
   .pad .empty-scenes,
-  .confirm-window {
+  .confirm-danger,
+  .confirm-ok {
     transition: none !important;
     animation: none !important;
   }
@@ -631,7 +632,6 @@ html[data-era="2001"] .sq:disabled {
 .eras button:focus-visible,
 .confirm-ok:focus-visible,
 .confirm-danger:focus-visible,
-.confirm-x:focus-visible,
 input:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
@@ -687,174 +687,6 @@ input:focus-visible {
 code {
   font-family: Consolas, "Cascadia Mono", ui-monospace, monospace;
   font-size: 0.95em;
-}
-
-.confirm {
-  position: fixed;
-  inset: 0;
-  z-index: 20;
-}
-
-.confirm-dim {
-  position: absolute;
-  inset: 0;
-  border: 0;
-  padding: 0;
-  background: rgba(0, 0, 0, 0.28);
-  cursor: default;
-}
-
-.confirm-window {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: min(360px, calc(100vw - 32px));
-  background: var(--face);
-  color: var(--ink);
-  border-radius: 0;
-}
-
-html[data-era="1998"] .confirm-window {
-  box-shadow:
-    inset -1px -1px 0 #000000,
-    inset 1px 1px 0 #ffffff,
-    inset -2px -2px 0 #808080,
-    inset 2px 2px 0 #dfdfdf;
-}
-
-html[data-era="2001"] .confirm-window {
-  background: #0831d9;
-  border-radius: 8px 8px 0 0;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.45);
-}
-
-html[data-era="2021"] .confirm-window {
-  background: var(--window);
-  border-radius: 8px;
-  border: 1px solid var(--stroke);
-}
-
-.confirm-caption {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 0 4px 0 6px;
-  color: #ffffff;
-  background: linear-gradient(90deg, #000080, #1084d0);
-  font-family: Tahoma, "Microsoft Sans Serif", sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-html[data-era="2001"] .confirm-caption {
-  height: 30px;
-  background: linear-gradient(#0058ee, #003092);
-  font-family: "Trebuchet MS", Tahoma, sans-serif;
-  border-radius: 7px 7px 0 0;
-}
-
-html[data-era="2021"] .confirm-caption {
-  height: auto;
-  padding: 8px 8px 0;
-  background: transparent;
-  color: var(--ink);
-  font-family: inherit;
-  font-weight: 600;
-}
-
-.confirm-mark {
-  width: 16px;
-  height: 16px;
-  image-rendering: pixelated;
-  flex: 0 0 auto;
-}
-
-html[data-era="2021"] .confirm-mark { display: none; }
-
-.confirm-caption span { flex: 1 1 auto; }
-
-.confirm-x {
-  width: 15px;
-  height: 15px;
-  padding: 0;
-  line-height: 13px;
-  color: #000000;
-  background: #c0c0c0;
-  border: 0;
-}
-
-html[data-era="2001"] .confirm-x {
-  width: 21px;
-  height: 21px;
-  color: #ffffff;
-  background: transparent;
-  font-weight: 700;
-}
-
-html[data-era="2021"] .confirm-x {
-  width: 32px;
-  height: 32px;
-  border-radius: 4px;
-  color: var(--ink);
-  background: transparent;
-  font-size: 16px;
-}
-
-html[data-era="2021"] .confirm-x:hover { background: #c42b1c; color: #ffffff; }
-
-.confirm-copy {
-  padding: 14px 16px 8px;
-}
-
-html[data-era="2001"] .confirm-copy {
-  margin: 0 3px 3px;
-  background: #ece9d8;
-}
-
-html[data-era="2021"] .confirm-copy { padding: 4px 16px 16px; }
-
-.confirm-title {
-  margin: 0 0 4px;
-  font-weight: 700;
-  font-size: 13px;
-}
-
-html[data-era="2021"] .confirm-title { font-size: 16px; }
-
-.confirm-follow {
-  margin: 0;
-  color: var(--muted);
-}
-
-.confirm-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 12px 12px 12px;
-}
-
-html[data-era="2001"] .confirm-actions {
-  margin: 0 3px 3px;
-  background: #ece9d8;
-  padding-top: 0;
-}
-
-.confirm.is-flash .confirm-caption {
-  animation: caption-flash 160ms linear 2;
-}
-
-html[data-era="2021"] .confirm.is-flash .confirm-window {
-  animation: card-flash 160ms linear 2;
-}
-
-@keyframes caption-flash {
-  50% { background: linear-gradient(90deg, #808080, #b5b5b5); }
-}
-
-@keyframes card-flash {
-  50% { outline: 2px solid var(--accent); outline-offset: 2px; }
 }
 
 @media (max-width: 720px) {
