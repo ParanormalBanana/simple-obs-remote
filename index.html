@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#C0C0C0">
+  <title>OBS remote</title>
+  <link rel="icon" href="assets/hourglass.ico">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    try {
+      var era = localStorage.getItem("simple-obs-remote.era");
+      document.documentElement.dataset.era = era === "2001" || era === "2021" ? era : "1998";
+    } catch (error) {
+      document.documentElement.dataset.era = "1998";
+    }
+  </script>
+</head>
+<body>
+  <header class="bar">
+    <form id="connect-form" class="connect">
+      <input id="address" type="text" name="address" spellcheck="false" autocomplete="off" placeholder="ws://localhost:4455" aria-label="OBS WebSocket address">
+      <input id="password" type="password" name="password" autocomplete="current-password" placeholder="password" aria-label="WebSocket password">
+      <label class="remember"><input id="remember" type="checkbox" checked> Save</label>
+      <div class="eras" role="group" aria-label="Era">
+        <button type="button" data-era="1998" aria-pressed="true">1998</button>
+        <button type="button" data-era="2001" aria-pressed="false">2001</button>
+        <button type="button" data-era="2021" aria-pressed="false">2021</button>
+      </div>
+      <button class="connect-go" type="submit">Connect</button>
+    </form>
+
+    <div id="pad" class="pad" hidden>
+    <div id="controls" class="controls">
+      <div class="transport">
+        <button id="stream" class="sq" type="button" title="Start stream" aria-label="Start stream">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16.5 6.64a7 7 0 0 1 0 10.72M7.5 6.64a7 7 0 0 0 0 10.72M14.7 8.78a4.2 4.2 0 0 1 0 6.44M9.3 8.78a4.2 4.2 0 0 0 0 6.44"/>
+            <circle cx="12" cy="12" r="1.7" fill="currentColor"/>
+          </svg>
+        </button>
+        <button id="start-all" class="sq" type="button" title="Start all" aria-label="Start all" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <g transform="translate(0.4 0.2) scale(0.68)" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+              <path d="M16.5 6.64a7 7 0 0 1 0 10.72M7.5 6.64a7 7 0 0 0 0 10.72M14.7 8.78a4.2 4.2 0 0 1 0 6.44M9.3 8.78a4.2 4.2 0 0 0 0 6.44"/>
+              <circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/>
+            </g>
+            <g transform="translate(7.2 7.6) scale(0.68)" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+              <path d="M16.5 6.64a7 7 0 0 1 0 10.72M7.5 6.64a7 7 0 0 0 0 10.72M14.7 8.78a4.2 4.2 0 0 1 0 6.44M9.3 8.78a4.2 4.2 0 0 0 0 6.44"/>
+              <circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/>
+            </g>
+          </svg>
+        </button>
+        <button id="record" class="sq" type="button" title="Start recording" aria-label="Start recording">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="6" fill="currentColor"/>
+          </svg>
+        </button>
+        <button id="pause" class="sq" type="button" title="Pause recording" aria-label="Pause recording" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="7" y="5" width="3.2" height="14" rx="1" fill="currentColor"/>
+            <rect x="13.8" y="5" width="3.2" height="14" rx="1" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div id="scenes" class="scenes" role="group" aria-label="Scenes"></div>
+    <button id="perf" class="perf" type="button" disabled data-layout="line">
+      <span class="perf-read">
+        <span class="perf-fps">Connected</span>
+        <span class="perf-cpu"></span>
+        <span class="perf-skip"></span>
+      </span>
+    </button>
+    <button id="disconnect" class="sq" type="button" title="Disconnect" aria-label="Disconnect">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 3.5V11M7.4 6.8a7 7 0 1 0 9.2 0"/>
+      </svg>
+    </button>
+    </div>
+  </header>
+
+  <p id="hint" class="hint">In OBS: Tools → WebSocket Server Settings → Enable WebSocket Server. The usual address is <code>ws://localhost:4455</code>.</p>
+
+  <div id="confirm" class="confirm" hidden>
+    <button type="button" class="confirm-dim" aria-label="Dialog is open"></button>
+    <div class="confirm-window" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <div class="confirm-caption">
+        <img class="confirm-mark" src="assets/hourglass-16-white.png" alt="" width="16" height="16">
+        <span>OBS remote</span>
+        <button type="button" class="confirm-x" aria-label="Close">×</button>
+      </div>
+      <div class="confirm-copy">
+        <p id="confirm-title" class="confirm-title"></p>
+        <p id="confirm-follow" class="confirm-follow"></p>
+      </div>
+      <div class="confirm-actions">
+        <button type="button" id="confirm-danger" class="confirm-danger"></button>
+        <button type="button" id="confirm-ok" class="confirm-ok">Just kidding!</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="vendor/obs-websocket.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
